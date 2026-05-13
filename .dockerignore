@@ -1,0 +1,18 @@
+venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+.env
+.env.local
+.git/
+.gitignore
+.vscode/
+.idea/
+ips_cuidando.db
+*.sqlite
+*.sqlite3
+README.md
+.pytest_cache/
+*.log
+HC PACIENTE*
