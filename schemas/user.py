@@ -25,6 +25,7 @@ class UserCreate(BaseModel):
 class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     phone: Optional[str] = None
+    role: Optional[UserRole] = None
     specialty: Optional[str] = None
     registration_number: Optional[str] = None
     is_active: Optional[bool] = None

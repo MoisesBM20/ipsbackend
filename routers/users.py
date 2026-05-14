@@ -61,11 +61,23 @@ def list_professionals(
     db: Session = Depends(get_db),
     _: User = Depends(require_any_staff),
 ):
-    """Lista doctores y enfermeros activos (para selector de agenda)."""
+    """Lista todos los empleados activos excepto pacientes (para selector de agenda)."""
     return db.query(User).filter(
-        User.role.in_([UserRole.DOCTOR, UserRole.NURSE]),
+        User.role != UserRole.PATIENT,
         User.is_active == True
     ).order_by(User.full_name).all()
+
+
+@router.get("/by-document/{document_number}", response_model=UserResponse, summary="Buscar usuario por documento")
+def get_user_by_document(
+    document_number: str,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    user = db.query(User).filter(User.document_number == document_number).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="No existe usuario con ese documento")
+    return user
 
 
 @router.get("/{user_id}", response_model=UserResponse, summary="Ver empleado por ID")
@@ -95,9 +107,11 @@ def update_user(
     if current_user.role != UserRole.ADMIN and current_user.id != user_id:
         raise HTTPException(status_code=403, detail="No tienes permiso para editar este usuario")
 
-    # Solo admin puede desactivar usuarios
+    # Solo admin puede desactivar usuarios o cambiar rol
     if body.is_active is not None and current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Solo el admin puede activar/desactivar usuarios")
+    if body.role is not None and current_user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo el admin puede cambiar el rol")
 
     for field, value in body.model_dump(exclude_none=True).items():
         setattr(user, field, value)

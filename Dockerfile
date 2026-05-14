@@ -1,23 +1,14 @@
-FROM python:3.11-slim
+FROM moisesbm/ipscuidando:v1
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+# 1. Borramos el index por defecto de Nginx por si acaso
+RUN rm -f /usr/share/nginx/html/index.html
 
-WORKDIR /app
+# 2. Copiamos el contenido de la subcarpeta 'browser' a la raíz
+# Usamos un truco de shell para asegurar que se muevan incluso archivos ocultos
+RUN cp -r /usr/share/nginx/html/browser/. /usr/share/nginx/html/
 
-# Copiar requirements primero (mejor cache de capas)
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+# 3. Limpiamos la carpeta browser para que no ocupe espacio doble
+RUN rm -rf /usr/share/nginx/html/browser
 
-# Copiar el resto del código
-COPY . .
-
-# Usuario no-root por seguridad
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
-USER appuser
-
-EXPOSE 8000
-
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# 4. Aseguramos que Nginx tenga permisos
+RUN chmod -R 755 /usr/share/nginx/html

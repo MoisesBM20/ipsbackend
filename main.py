@@ -4,7 +4,7 @@ from database import create_tables
 from core.config import settings
 
 # Importar todos los routers
-from routers import auth, users, patients, availability, appointments, clinical_records, rips, dashboard, public, patient_portal, audit
+from routers import auth, users, patients, availability, appointments, clinical_records, rips, dashboard, public, patient_portal, audit, services
 
 app = FastAPI(
     title="CUIDANDO DE TI CyE IPS SAS - API",
@@ -39,6 +39,7 @@ app.include_router(rips.router)
 app.include_router(dashboard.router)
 app.include_router(patient_portal.router)
 app.include_router(audit.router)
+app.include_router(services.router)
 
 
 # ── Startup ───────────────────────────────────────────────────────────────────
